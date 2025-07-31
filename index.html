@@ -17,8 +17,11 @@
   </form>
   <div class="result" id="result"></div>
   <button id="newAngle" style="display:none;">Nuevo Ángulo</button>
+  <ul id="attempts" style="list-style:none; padding:0;"></ul>
   <script>
     let currentAngle = 0;
+    let attempts = [];
+    const maxAttempts = 5;
 
     function drawAngle(angle) {
       const canvas = document.getElementById('canvas');
@@ -66,6 +69,23 @@
       return Math.floor(Math.random() * 360) + 1;
     }
 
+    function getCalificacion(diff) {
+      if (diff <= 5) return "¡Muy caliente!";
+      if (diff <= 15) return "Caliente";
+      if (diff <= 30) return "Frío";
+      return "Muy frío";
+    }
+
+    function updateAttemptsList() {
+      const ul = document.getElementById('attempts');
+      ul.innerHTML = '';
+      attempts.forEach((att, idx) => {
+        const li = document.createElement('li');
+        li.textContent = `Intento ${idx + 1}: ${att.guess}° — ${att.calificacion}`;
+        ul.appendChild(li);
+      });
+    }
+
     function newGame() {
       currentAngle = randomAngle();
       drawAngle(currentAngle);
@@ -73,20 +93,32 @@
       document.getElementById('guessForm').reset();
       document.getElementById('newAngle').style.display = 'none';
       document.getElementById('guess').disabled = false;
+      attempts = [];
+      updateAttemptsList();
     }
 
     document.getElementById('guessForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const guess = parseInt(document.getElementById('guess').value, 10);
       const diff = Math.abs(currentAngle - guess);
-      const tolerance = 5; // Aca se cambia la tolerancia de que tan cerca debe estar la respuesta  
+      const tolerance = 0; //Aca se puede ajustar la tolerancia, la puse en 0 debido a que ahora hay mas intentos
+      const calificacion = getCalificacion(diff);
+
+      attempts.push({ guess, calificacion });
+      updateAttemptsList();
+
       if (diff <= tolerance || Math.abs(currentAngle - guess + 360) <= tolerance || Math.abs(currentAngle - guess - 360) <= tolerance) {
         document.getElementById('result').textContent = `¡Correcto! El ángulo era ${currentAngle}° 🎉`;
+        document.getElementById('newAngle').style.display = 'inline-block';
+        document.getElementById('guess').disabled = true;
+      } else if (attempts.length >= maxAttempts) {
+        document.getElementById('result').textContent = `¡Se acabaron los intentos! El ángulo era ${currentAngle}°.`;
+        document.getElementById('newAngle').style.display = 'inline-block';
+        document.getElementById('guess').disabled = true;
       } else {
-        document.getElementById('result').textContent = `Incorrecto. El ángulo era ${currentAngle}°.`;
+        document.getElementById('result').textContent = `Incorrecto. Te quedan ${maxAttempts - attempts.length} intento(s).`;
       }
-      document.getElementById('newAngle').style.display = 'inline-block';
-      document.getElementById('guess').disabled = true;
+      document.getElementById('guessForm').reset();
     });
 
     document.getElementById('newAngle').addEventListener('click', newGame);
@@ -103,9 +135,9 @@
     #canvas {
       margin: 20px auto;
       display: block;
-      background: #f0f0f0;
+      background: #ffffff;
       border-radius: 50%;
-      box-shadow: 0 0 10px #ccc;
+      box-shadow: 0 0 10px #ffffff;
     }
     .result {
       margin-top: 20px;
