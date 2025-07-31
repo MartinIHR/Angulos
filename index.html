@@ -32,13 +32,6 @@
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Circulo base
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
-      ctx.strokeStyle = '#888';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
       // Linea base (0°)
       ctx.beginPath();
       ctx.moveTo(cx, cy);
@@ -77,14 +70,22 @@
     }
 
     function updateAttemptsList() {
-      const ul = document.getElementById('attempts');
-      ul.innerHTML = '';
-      attempts.forEach((att, idx) => {
-        const li = document.createElement('li');
-        li.textContent = `Intento ${idx + 1}: ${att.guess}° — ${att.calificacion}`;
-        ul.appendChild(li);
-      });
-    }
+  const ul = document.getElementById('attempts');
+  ul.innerHTML = '';
+  attempts.forEach((att, idx) => {
+    const li = document.createElement('li');
+    let flecha = '';
+    if (att.guess > currentAngle) flecha = '↓';
+    else if (att.guess < currentAngle) flecha = '↑';
+    else flecha = '✔️';
+    li.innerHTML = `Intento ${idx + 1}: ${att.guess}° <span style="margin-left:10px; font-size:1.2em;">${flecha}</span> — ${att.calificacion}`;
+    if (att.calificacion.includes("Muy caliente")) li.style.color = "#e74c3c";
+    else if (att.calificacion.includes("Caliente")) li.style.color = "#f39c12";
+    else if (att.calificacion.includes("Frío") && !att.calificacion.includes("Muy")) li.style.color = "#2980b9";
+    else if (att.calificacion.includes("Muy frío")) li.style.color = "#7f8c8d";
+    ul.appendChild(li);
+  });
+}
 
     function newGame() {
       currentAngle = randomAngle();
@@ -128,32 +129,103 @@
 
 <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       text-align: center;
       padding-top: 40px;
+      background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+      min-height: 100vh;
+    }
+    h1 {
+      color: #2d3e50;
+      font-size: 2.2em;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 8px #b0c4de;
+    }
+    p {
+      color: #34495e;
+      font-size: 1.1em;
+      margin: 8px 0;
     }
     #canvas {
       margin: 20px auto;
       display: block;
       background: #ffffff;
       border-radius: 50%;
-      box-shadow: 0 0 10px #ffffff;
+      box-shadow: 0 0 18px #b0c4de;
+      border: 2px solid #3498db;
+      transition: box-shadow 0.3s;
     }
     .result {
       margin-top: 20px;
-      font-size: 1.2em;
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #2980b9;
+      min-height: 32px;
+      transition: color 0.3s;
     }
     input[type="number"] {
       width: 80px;
       font-size: 1em;
-      padding: 4px;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #3498db;
+      margin-top: 8px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 4px #b0c4de;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="number"]:focus {
+      border-color: #2980b9;
     }
     button {
       font-size: 1em;
-      padding: 5px 15px;
+      padding: 7px 20px;
       margin-left: 10px;
       cursor: pointer;
+      background: linear-gradient(90deg, #3498db 60%, #6dd5fa 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px #b0c4de;
+      transition: background 0.2s, box-shadow 0.2s;
     }
-  </style>
+    button:hover {
+      background: linear-gradient(90deg, #2980b9 60%, #3498db 100%);
+      box-shadow: 0 4px 16px #b0c4de;
+    }
+    #attempts {
+      margin: 24px auto 0 auto;
+      padding: 0;
+      max-width: 340px;
+      text-align: left;
+    }
+    #attempts li {
+      background: #f7fbff;
+      border-left: 6px solid #3498db;
+      margin-bottom: 10px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 1.08em;
+      box-shadow: 0 1px 6px #b0c4de;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 0.5s;
+    }
+    #attempts li:nth-child(odd) {
+      background: #eaf6ff;
+    }
+    /* Colores para calificaciones */
+    #attempts li:contains("Muy caliente") { color: #e74c3c; }
+    #attempts li:contains("Caliente") { color: #f39c12; }
+    #attempts li:contains("Frío") { color: #2980b9; }
+    #attempts li:contains("Muy frío") { color: #7f8c8d; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+</style>
   
 </html>
